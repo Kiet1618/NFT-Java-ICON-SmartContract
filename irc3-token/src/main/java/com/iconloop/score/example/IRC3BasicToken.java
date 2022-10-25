@@ -22,6 +22,8 @@ import score.Context;
 import score.annotation.External;
 import com.iconloop.score.util.EnumerableMap;
 import com.iconloop.score.util.IntSet;
+import score.annotation.Payable;
+
 
 import java.math.BigInteger;
 
@@ -29,14 +31,19 @@ public class IRC3BasicToken extends IRC3Basic {
     public IRC3BasicToken(String _name, String _symbol) {
         super(_name, _symbol);
     }
-
     @External
     public void mint(BigInteger _tokenId) {
         // simple access control - only the contract owner can mint new token
         // Context.require(Context.getCaller().equals(Context.getOwner()));
         super._mint(Context.getCaller(), _tokenId);
     }
-
+    @Payable
+    @External
+    public void buy(BigInteger _tokenId) {
+        // simple access control - only the contract owner can mint new token
+        // Context.require(Context.getCaller().equals(Context.getOwner()));
+        super._mint(Context.getCaller(), _tokenId);
+    }
     @External
     public void burn(BigInteger _tokenId) {
         // simple access control - only the owner of token can burn it
@@ -75,5 +82,22 @@ public class IRC3BasicToken extends IRC3Basic {
             _tokenID = new BigInteger("4");
         }
         super._mint(Context.getCaller(), _tokenID);
+    }
+    @External(readonly=true)
+    public BigInteger _tokenOfOwnerByIndex(Address _owner, int _index) {
+        return super.tokenOfOwnerByIndex(_owner,_index);
+    }
+    @External(readonly=true)
+    public Address _ownerOf(BigInteger _tokenId) {
+        return super.ownerOf(_tokenId);
+    }
+    @External(readonly=true)
+    public int _balanceOf(Address _owner) {
+        
+        return super.balanceOf(_owner);
+    }
+    @External(readonly=true)
+    public int _totalSupply() {
+        return super.totalSupply();
     }
 }

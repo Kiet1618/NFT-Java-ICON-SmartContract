@@ -147,38 +147,6 @@ public abstract class IRC3Basic implements IRC3 {
         tokenOwners.set(tokenId, to);
         Transfer(ZERO_ADDRESS, to, tokenId);
     }
-    @External (readonly=true)
-    public String tokenURI(BigInteger tokenId) {
-        if(tokenId.compareTo(new BigInteger("1")) ==0){
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh1";
-        }
-        else if(tokenId.compareTo(new BigInteger("2"))==0){
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh2";
-        }
-        else if(tokenId.compareTo(new BigInteger("3")) ==0){
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh3";
-        }
-        else{
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh4";
-        }
-    }
-    @External(readonly=true)
-    public Address ownerOfURI(String _tokenURI) {
-        BigInteger _tokenId;
-        if(_tokenURI =="https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh1"){
-             _tokenId = new BigInteger("1");
-        }
-        else if(_tokenURI =="https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh2"){
-             _tokenId = new BigInteger("2");
-        }
-        else if(_tokenURI =="https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh3"){
-             _tokenId = new BigInteger("3");
-        }
-        else{
-             _tokenId = new BigInteger("4");
-        }
-        return tokenOwners.getOrThrow(_tokenId, "Non-existent token");
-    }
     /**
      * Destroys `tokenId`.
      */
@@ -195,6 +163,7 @@ public abstract class IRC3Basic implements IRC3 {
     protected boolean _tokenExists(BigInteger tokenId) {
         return tokenOwners.contains(tokenId);
     }
+    
 
     private void _addTokenTo(BigInteger tokenId, Address to) {
         var tokens = holderTokens.get(to);
