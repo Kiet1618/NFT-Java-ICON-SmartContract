@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ICON Foundation
+ * Copyright 2020 ICONLOOP Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,116 +14,58 @@
  * limitations under the License.
  */
 
-package foundation.icon.test.score;
+package com.iconloop.score.example;
+import static java.math.BigInteger.ONE;
+import static java.math.BigInteger.ZERO;
+import static score.Context.require;
 
-import foundation.icon.icx.Wallet;
-import foundation.icon.icx.data.Address;
-import foundation.icon.icx.data.Bytes;
-import foundation.icon.icx.transport.jsonrpc.RpcObject;
-import foundation.icon.icx.transport.jsonrpc.RpcValue;
-import foundation.icon.test.ResultTimeoutException;
-import foundation.icon.test.TransactionFailureException;
-import foundation.icon.test.TransactionHandler;
+import com.iconloop.score.token.irc3.IRC3Basic;
+import score.Address;
+import score.Context;
+import score.annotation.External;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
-import static foundation.icon.test.Env.LOG;
+import score.BranchDB;
+import score.DictDB;
+import score.annotation.EventLog;
+import score.annotation.Optional;
 
-public class IRC3TokenScore extends Score {
-    public IRC3TokenScore(Score other) {
-        super(other);
+public class IRC3BasicToken extends IRC3Basic {
+
+    public IRC3BasicToken(String _name, String _symbol) {
+        super(_name, _symbol);
+    }
+    
+    @External
+    public void mint(BigInteger _tokenId) {
+        // simple access control - only the contract owner can mint new token
+       // Context.require(Context.getCaller().equals(Context.getOwner()));
+        super._mint(Context.getCaller(), _tokenId);
     }
 
-    public static IRC3TokenScore mustDeploy(TransactionHandler txHandler, Wallet owner)
-            throws ResultTimeoutException, TransactionFailureException, IOException {
-        LOG.infoEntering("deploy", "IRC3Token");
-        RpcObject params = new RpcObject.Builder()
-                .put("_name", new RpcValue("IRC3Token"))
-                .put("_symbol", new RpcValue("NFT"))
-                .build();
-        Score score = txHandler.deploy(owner, getFilePath("irc3-token"), params);
-        LOG.info("scoreAddr = " + score.getAddress());
-        LOG.infoExiting();
-        return new IRC3TokenScore(score);
+    @External
+    public void burn(BigInteger _tokenId) {
+        // simple access control - only the owner of token can burn it
+        Address owner = ownerOf(_tokenId);
+        Context.require(Context.getCaller().equals(owner));
+        super._burn(_tokenId);
+    }
+    @External (readonly=true)
+    public String tokenURI(BigInteger tokenId) {
+        if(tokenId.compareTo(new BigInteger("1")) ==0){
+            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh1".get();
+        }
+        else if(tokenId.compareTo(new BigInteger("2"))==0){
+            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh2".get();
+        }
+        else if(tokenId.compareTo(new BigInteger("3")) ==0){
+            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh3".get();
+        }
+        else{
+            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh4".get();
+        }
     }
 
-    public Address ownerOf(BigInteger tokenId) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_tokenId", new RpcValue(tokenId))
-                .build();
-        return call("ownerOf", params).asAddress();
-    }
 
-    public Address getApproved(BigInteger tokenId) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_tokenId", new RpcValue(tokenId))
-                .build();
-        return call("getApproved", params).asAddress();
-    }
-
-    public BigInteger balanceOf(Address owner) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_owner", new RpcValue(owner))
-                .build();
-        return call("balanceOf", params).asInteger();
-    }
-
-    public BigInteger totalSupply() throws IOException {
-        return call("totalSupply", null).asInteger();
-    }
-
-    public BigInteger tokenByIndex(int index) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_index", new RpcValue(BigInteger.valueOf(index)))
-                .build();
-        return call("tokenByIndex", params).asInteger();
-    }
-
-    public BigInteger tokenOfOwnerByIndex(Address owner, int index) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_owner", new RpcValue(owner))
-                .put("_index", new RpcValue(BigInteger.valueOf(index)))
-                .build();
-        return call("tokenOfOwnerByIndex", params).asInteger();
-    }
-
-    public Bytes mint(Wallet wallet, BigInteger tokenId) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_tokenId", new RpcValue(tokenId))
-                .build();
-        return invoke(wallet, "mint", params);
-    }
-
-    public Bytes burn(Wallet wallet, BigInteger tokenId) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_tokenId", new RpcValue(tokenId))
-                .build();
-        return invoke(wallet, "burn", params);
-    }
-
-    public Bytes approve(Wallet wallet, Address to, BigInteger tokenId) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_to", new RpcValue(to))
-                .put("_tokenId", new RpcValue(tokenId))
-                .build();
-        return invoke(wallet, "approve", params);
-    }
-
-    public Bytes transfer(Wallet wallet, Address to, BigInteger tokenId) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_to", new RpcValue(to))
-                .put("_tokenId", new RpcValue(tokenId))
-                .build();
-        return invoke(wallet, "transfer", params);
-    }
-
-    public Bytes transferFrom(Wallet wallet, Address from, Address to, BigInteger tokenId) throws IOException {
-        RpcObject params = new RpcObject.Builder()
-                .put("_from", new RpcValue(from))
-                .put("_to", new RpcValue(to))
-                .put("_tokenId", new RpcValue(tokenId))
-                .build();
-        return invoke(wallet, "transferFrom", params);
-    }
 }
