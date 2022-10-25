@@ -1,4 +1,4 @@
-#Deloy 
+# Deloy 
 goloop rpc sendtx deploy ./irc3-token/build/libs/irc3-token-0.9.0-optimized.jar \
     --uri https://sejong.net.solidwallet.io/api/v3 \
     --key_store /$HOME/gochain-local/data/godWallet.json --key_password gochain \
