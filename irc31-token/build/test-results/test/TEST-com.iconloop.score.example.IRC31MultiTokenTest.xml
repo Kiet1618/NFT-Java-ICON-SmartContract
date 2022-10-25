@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.iconloop.score.example.IRC31MultiTokenTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-10-25T09:31:31" hostname="ubuntu" time="0.026">
+  <properties/>
+  <testcase name="name()" classname="com.iconloop.score.example.IRC31MultiTokenTest" time="0.026"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
