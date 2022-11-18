@@ -28,22 +28,57 @@ import score.annotation.Payable;
 import java.math.BigInteger;
 
 public class IRC3BasicToken extends IRC3Basic {
+    private final EnumerableMap<BigInteger, String> tokenURI = new EnumerableMap<>("URI", BigInteger.class, String.class);
+    
+    public static BigInteger ID = new BigInteger("1");
+
     public IRC3BasicToken(String _name, String _symbol) {
         super(_name, _symbol);
     }
+
     @External
     public void mint(BigInteger _tokenId) {
         // simple access control - only the contract owner can mint new token
+        Context.require(Context.getCaller().equals(Context.getOwner()));
+        super._mint(Context.getCaller(),_tokenId);
+        ID = ID.add(new BigInteger("1"));
+    }
+    @External
+    public void safeMint() {
+        // simple access control - only the contract owner can mint new token
         // Context.require(Context.getCaller().equals(Context.getOwner()));
+        super._mint(Context.getCaller(),ID);
+        ID = ID.add(new BigInteger("1"));
+    }
+
+
+    @External
+    public void _setTokenURI(BigInteger _tokenId, String _data){
+        tokenURI.set(_tokenId, _data);
+    }
+    @External
+    public void mintURI(BigInteger _tokenId, String _data){
+        Context.require(Context.getCaller().equals(Context.getOwner()));
         super._mint(Context.getCaller(), _tokenId);
+        _setTokenURI(_tokenId, _data);
+        ID = ID.add(new BigInteger("1"));
+
+    }
+    @External
+    public void safeMintURI(String _data){
+        super._mint(Context.getCaller(), ID);
+        _setTokenURI(ID, _data);
+        ID = ID.add(new BigInteger("1"));
+
     }
     @Payable
     @External
-    public void buy(BigInteger _tokenId) {
-        // simple access control - only the contract owner can mint new token
-        // Context.require(Context.getCaller().equals(Context.getOwner()));
-        super._mint(Context.getCaller(), _tokenId);
+    public void share(BigInteger _tokenId){
+        super._mint(Context.getCaller(), ID);
+        _setTokenURI(ID, _tokenURI(_tokenId));
+        ID = ID.add(new BigInteger("1"));
     }
+
     @External
     public void burn(BigInteger _tokenId) {
         // simple access control - only the owner of token can burn it
@@ -52,37 +87,11 @@ public class IRC3BasicToken extends IRC3Basic {
         super._burn(_tokenId);
     }
     @External (readonly=true)
-    public String tokenURI(BigInteger tokenId) {
-        if(tokenId.compareTo(new BigInteger("1")) ==0){
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh1";
-        }
-        else if(tokenId.compareTo(new BigInteger("2"))==0){
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh2";
-        }
-        else if(tokenId.compareTo(new BigInteger("3")) ==0){
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh3";
-        }
-        else{
-            return "https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh4";
-        }
+    public String _tokenURI(BigInteger _tokenId) {
+        return tokenURI.getOrThrow(_tokenId, "Non-existent token");
+
     }
-    @External
-    public void mintURI(String _tokenURI){
-        BigInteger _tokenID = new BigInteger("0");
-        if(_tokenURI.equals("https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh1") ){
-            _tokenID = new BigInteger("1");
-        }
-        if(_tokenURI.equals("https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh2")  ){
-            _tokenID = new BigInteger("2");
-        }
-        if(_tokenURI.equals("https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh3")  ){
-            _tokenID = new BigInteger("3");
-        }
-        if(_tokenURI.equals("https://634ea7934af5fdff3a634e75.mockapi.io/api/Anh4") ){
-            _tokenID = new BigInteger("4");
-        }
-        super._mint(Context.getCaller(), _tokenID);
-    }
+    
     @External(readonly=true)
     public BigInteger _tokenOfOwnerByIndex(Address _owner, int _index) {
         return super.tokenOfOwnerByIndex(_owner,_index);
